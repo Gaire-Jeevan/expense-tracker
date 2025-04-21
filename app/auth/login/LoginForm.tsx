@@ -1,9 +1,11 @@
 "use client";
 
+import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 interface LoginFormData {
   email: string;
@@ -13,6 +15,7 @@ interface LoginFormData {
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -25,10 +28,23 @@ const LoginForm = () => {
     console.log(data);
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
 
-    reset();
+    try {
+      const response = await axios.post("http://localhost:8081/api/users/login", data);
+      // console.log("Login success: ", response.data);
+
+      router.push("/")
+      reset();
+    } catch (error: any) {
+      console.error("Login Failed", error);
+      alert(error.response.data?.message || "Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    // setIsSubmitting(false);
+
+    // reset();
   };
 
   return (

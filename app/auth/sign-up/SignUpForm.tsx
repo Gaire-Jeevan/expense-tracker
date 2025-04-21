@@ -1,13 +1,14 @@
 "use client";
 
+import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 interface SignupFormData {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password: string;
 }
@@ -15,6 +16,7 @@ interface SignupFormData {
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -27,43 +29,54 @@ const SignUpForm = () => {
     console.log(data);
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
+    try {
+      const response = await axios.post("http://localhost:8081/api/users/register", data);
+
+      router.push("/auth/login")
+      reset();
+    } catch (error: any) {
+      console.error("Signup Failed", error);
+      alert(error.response.data?.message || "Signup failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    // setIsSubmitting(false);
 
     reset();
   };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(signupHandler)}>
-      <div className="flex flex-col sm:flex-row justify-between gap-5">
+      {/* <div className="flex flex-col sm:flex-row justify-between gap-5"> */}
         <div className="flex flex-col">
-          <label htmlFor="firstName" className="font-medium text-lg">
-            First Name
+          <label htmlFor="Name" className="font-medium text-lg">
+             Name
           </label>
           <div className="border border-gray-300 p-1 rounded-md focus-within:border-2 focus-within:border-blue-500 mt-1">
             <input
               type="text"
-              {...register("firstName", {
-                required: "First Name is required",
+              {...register("name", {
+                required: "Name is required",
                 minLength: {
                   value: 5,
                   message:
-                    "The minimum length of first name should be 5 character",
+                    "The minimum length of name should be 5 character",
                 },
                 maxLength: {
                   value: 15,
                   message:
-                    "The maximum length of first name should be 15 character",
+                    "The maximum length of name should be 15 character",
                 },
               })}
-              id="firstName"
-              placeholder="John"
+              id="name"
+              placeholder="John Doe"
               className="focus:outline-none w-full"
             />
           </div>
         </div>
 
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <label htmlFor="lastName" className="font-medium text-lg">
             Last Name
           </label>
@@ -88,8 +101,8 @@ const SignUpForm = () => {
               className="focus:outline-none w-full"
             />
           </div>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
 
       <div className="flex flex-col">
         <label htmlFor="email" className="font-medium text-lg">
